@@ -10,6 +10,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import frc.robot.util.GenerateEmptyIO;
+import frc.robot.util.tunable.PIDConstants;
 
 /**
  * Hardware abstraction layer for the adjustable hood subsystem.
@@ -44,4 +45,6 @@ public interface AdjustableHoodIO {
      * @param angle - the wanted angle
      */
     public void setTargetAngle(Angle angle);
+
+    public void setPID(PIDConstants constants);
 }

@@ -14,6 +14,7 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import frc.robot.Constants;
 import frc.robot.util.PhoenixSignals;
+import frc.robot.util.tunable.PIDConstants;
 
 /** adjustable hood hardware */
 public class AdjustableHoodReal implements AdjustableHoodIO {
@@ -34,14 +35,8 @@ public class AdjustableHoodReal implements AdjustableHoodIO {
     public AdjustableHoodReal() {
 
         // PID and feedforward
+        Constants.AdjustableHood.pid.apply(hoodConfig.Slot0);
 
-        hoodConfig.Slot0.kP = Constants.AdjustableHood.KP;
-        hoodConfig.Slot0.kI = Constants.AdjustableHood.KI;
-        hoodConfig.Slot0.kD = Constants.AdjustableHood.KD;
-        hoodConfig.Slot0.kS = Constants.AdjustableHood.KS;
-        hoodConfig.Slot0.kV = Constants.AdjustableHood.KV;
-        hoodConfig.Slot0.kA = Constants.AdjustableHood.KA;
-        hoodConfig.Slot0.kG = Constants.AdjustableHood.KG;
         hoodConfig.MotionMagic.MotionMagicCruiseVelocity = Constants.AdjustableHood.MMCVelocity;
         hoodConfig.MotionMagic.MotionMagicAcceleration = Constants.AdjustableHood.MMAcceleration;
         hoodConfig.MotionMagic.MotionMagicJerk = Constants.AdjustableHood.MMJerk;
@@ -65,7 +60,11 @@ public class AdjustableHoodReal implements AdjustableHoodIO {
         PhoenixSignals.registerSignals(false, hoodAngle, hoodVoltage, hoodCurrent, hoodVelocity);
     }
 
-
+    @Override
+    public void setPID(PIDConstants constants) {
+        constants.apply(hoodConfig.Slot0);
+        hoodMotor.getConfigurator().apply(hoodConfig);
+    }
 
     @Override
     public void setAdjustableHoodVoltage(double volts) {

@@ -7,6 +7,7 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 
 /**
  * Adjustable Hood Subsystem
@@ -30,6 +31,8 @@ public class AdjustableHood extends SubsystemBase {
     public void periodic() {
         io.updateInputs(inputs);
         Logger.processInputs("Adjustable Hood", inputs);
+
+        Constants.AdjustableHood.pid.ifDirty(io::setPID);
 
         Logger.recordOutput("AdjustableHood/ActualAngle (Deg)", inputs.relativeAngle.in(Degrees));
         SmartDashboard.putNumber("AdjustableHood/ActualAngle (Deg)",

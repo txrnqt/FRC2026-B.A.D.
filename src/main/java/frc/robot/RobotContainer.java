@@ -52,7 +52,6 @@ import frc.robot.subsystems.swerve.util.TeleopControls;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOEmpty;
 import frc.robot.subsystems.vision.VisionReal;
-import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.tunable.ShotDataHelper;
 import frc.robot.viz.RobotViz;
 
@@ -71,7 +70,7 @@ public final class RobotContainer {
     public final CommandXboxController pit = new CommandXboxController(3);
     /* Auto utilities */
     private final AutoChooser autoChooser = new AutoChooser();
-    private final AutoCommandFactory autoCommandFactory;
+    // private final AutoCommandFactory autoCommandFactory;
     /* Subsystems */
     private final LEDs leds = new LEDs();
     private final Swerve swerve;
@@ -149,12 +148,13 @@ public final class RobotContainer {
         // END DASHBOARD STUFF
         viz = new RobotViz(sim, swerve, adjustableHood, intake, shooter);
         // AUTO STUFF
-        autoCommandFactory = new AutoCommandFactory(swerve.autoFactory, swerve, adjustableHood,
-            intake, indexer, shooter);
-        autoChooser.addCmd("Do Nothing", Commands::none);
-        autoChooser.addRoutine("Gather then Shoot (Left)", autoCommandFactory::gatherThenShootLeft);
-        autoChooser.addRoutine("Just Shoot", autoCommandFactory::justShoot);
-        autoChooser.addRoutine("WilsonTest", autoCommandFactory::wilsonTest);
+        // autoCommandFactory = new AutoCommandFactory(swerve.autoFactory, swerve, adjustableHood,
+        // intake, indexer, shooter);
+        // autoChooser.addCmd("Do Nothing", Commands::none);
+        // autoChooser.addRoutine("Gather then Shoot (Left)",
+        // autoCommandFactory::gatherThenShootLeft);
+        // autoChooser.addRoutine("Just Shoot", autoCommandFactory::justShoot);
+        // autoChooser.addRoutine("WilsonTest", autoCommandFactory::wilsonTest);
         // Trigger isn't working for some reason during disabled mode, moved to disabled periodic
         // RobotModeTriggers.disabled().whileTrue(Commands.run(() -> {
         // double x = SmartDashboard.getNumber(Constants.DashboardValues.shootX, 0);
@@ -220,21 +220,21 @@ public final class RobotContainer {
     private void setupDriver() {
         driver.y().onTrue(swerve.setFieldRelativeOffset());
         driver.x().whileTrue(swerve.wheelsIn());
-        driver.rightTrigger().whileTrue(CommandFactory.shoot(swerve.state, () -> {
-            if (AllianceFlipUtil.apply(swerve.state.getGlobalPoseEstimate())
-                .getX() > FieldConstants.Hub.centerHub.getX()) {
-                return AllianceFlipUtil
-                    .apply(new Translation2d(0, FieldConstants.fieldWidth / 2.0));
-            } else {
-                return AllianceFlipUtil.apply(FieldConstants.Hub.centerHub);
-            }
-        }, shooter, indexer, adjustableHood, () -> trims[0], () -> trims[1],
-            () -> combineControllers((Predicate<CommandXboxController>) (x) -> x.b().getAsBoolean(),
-                driver, operator))
-            .alongWith(swerve.driveUserRelative(TeleopControls.teleopControls(
-                () -> -driver.getLeftY(), () -> -driver.getLeftX(), () -> -driver.getRightX(),
-                Constants.DriverControls.driverTranslationalShootSpeed,
-                Constants.DriverControls.driverRotationalShootSpeed))));
+        // driver.rightTrigger().whileTrue(CommandFactory.shoot(swerve.state, () -> {
+        // if (AllianceFlipUtil.apply(swerve.state.getGlobalPoseEstimate())
+        // .getX() > FieldConstants.Hub.centerHub.getX()) {
+        // return AllianceFlipUtil
+        // .apply(new Translation2d(0, FieldConstants.fieldWidth / 2.0));
+        // } else {
+        // return AllianceFlipUtil.apply(FieldConstants.Hub.centerHub);
+        // }
+        // }, shooter, indexer, adjustableHood, () -> trims[0], () -> trims[1],
+        // () -> combineControllers((Predicate<CommandXboxController>) (x) -> x.b().getAsBoolean(),
+        // driver, operator))
+        // .alongWith(swerve.driveUserRelative(TeleopControls.teleopControls(
+        // () -> -driver.getLeftY(), () -> -driver.getLeftX(), () -> -driver.getRightX(),
+        // Constants.DriverControls.driverTranslationalShootSpeed,
+        // Constants.DriverControls.driverRotationalShootSpeed))));
         driver.povUp().onTrue(Commands.runOnce(() -> {
             trims[0] += 0.50;
         }));

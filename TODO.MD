@@ -1,0 +1,8 @@
+- [ ] fix auto shoot commands 
+- [ ] change vision to work with cameras in cad
+- [ ] remove turret camera
+- [ ] explore 3628 and 5000 auto shoot stuff
+- [ ] re-tune hood
+- [ ] re-write mag (FOUR KRAKEN x60???)
+- [ ] re-tune shooter
+- [ ] re-write indexer (tbd)

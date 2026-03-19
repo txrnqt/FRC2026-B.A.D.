@@ -3,6 +3,7 @@ package frc.robot.subsystems.adjustable_hood;
 import static edu.wpi.first.units.Units.Radians;
 import edu.wpi.first.units.measure.Angle;
 import frc.robot.sim.SimPosition;
+import frc.robot.util.tunable.PIDConstants;
 
 /**
  * Simulation implementation of {@link AdjustableHoodIO}.
@@ -27,5 +28,8 @@ public class AdjustableHoodSim implements AdjustableHoodIO {
     public void setTargetAngle(Angle angle) {
         hoodTarget = angle.in(Radians);
     }
+
+    @Override
+    public void setPID(PIDConstants constants) {}
 
 }
