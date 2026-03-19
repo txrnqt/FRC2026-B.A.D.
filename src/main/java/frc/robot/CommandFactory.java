@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.adjustable_hood.AdjustableHood;
 import frc.robot.subsystems.indexer.Indexer;
+import frc.robot.subsystems.magazine.Magazine;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.swerve.Swerve;
 
@@ -55,7 +56,7 @@ public class CommandFactory {
 
     /** Shoot at a given target. */
     public static Command shoot(RobotState state, Supplier<Translation2d> targetSupplier,
-        Swerve swerve, Shooter shooter, Indexer indexer, AdjustableHood hood,
+        Swerve swerve, Shooter shooter, Indexer indexer, AdjustableHood hood, Magazine magazine,
         DoubleSupplier adjustUp, DoubleSupplier adjustLeft, CommandXboxController controller,
         BooleanSupplier disableTurret) {
         return Commands.runEnd(() -> {
@@ -101,15 +102,15 @@ public class CommandFactory {
                 MathUtil.clamp(parameters.hoodAngleDeg(), 0.0, 30.0));
             Logger.recordOutput("AutoShoot/distanceFeet", Units.metersToFeet(distance));
             if (isOkay) {
-                indexer.setMagazineDutyCycle(1.0);
+                magazine.setVoltage(3.0);
                 indexer.setSpindexerDutyCycle(6.0);
             } else {
-                indexer.setMagazineDutyCycle(0.0);
+                magazine.setVoltage(0.0);
                 indexer.setSpindexerDutyCycle(0.0);
             }
         }, () -> {
             shooter.setVelocity(0.0);
-            indexer.setMagazineDutyCycle(0.0);
+            magazine.setVoltage(0.0);
             indexer.setSpindexerDutyCycle(0.0);
         }, shooter, swerve, indexer, hood);
     }

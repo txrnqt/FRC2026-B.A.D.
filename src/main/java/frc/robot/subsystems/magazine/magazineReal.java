@@ -16,7 +16,7 @@ import frc.robot.util.tunable.FlywheelConstants;
 /**
  * real implementation of indexer
  */
-public class magazineReal implements magazineIO {
+public class MagazineReal implements MagazineIO {
     private final TalonFX motor0 = new TalonFX(Constants.Magazine.motor0ID);
     private final TalonFX motor1 = new TalonFX(Constants.Magazine.motor1ID);
     private final TalonFX motor2 = new TalonFX(Constants.Magazine.motor2ID);
@@ -32,7 +32,7 @@ public class magazineReal implements magazineIO {
     private double desiredSpeed = 3.0;
 
     /** Real Indexer Implementation */
-    public magazineReal() {
+    public MagazineReal() {
         Logger.recordOutput("Magazine/desiredSpeed", desiredSpeed);
 
         PhoenixSignals.registerSignals(false, motor0Velocity, motor0Voltage);
@@ -40,7 +40,7 @@ public class magazineReal implements magazineIO {
     }
 
     @Override
-    public void updateInputs(magazineInputs inputs) {
+    public void updateInputs(MagazineInputs inputs) {
         BaseStatusSignal.refreshAll(motor0Velocity, motor0Voltage);
 
         inputs.magazineVelocity = motor0Velocity.getValue();

@@ -3,6 +3,9 @@
 - [ ] remove turret camera
 - [ ] explore 3628 and 5000 auto shoot stuff
 - [ ] re-tune hood
-- [ ] re-write mag (FOUR KRAKEN x60???)
+- [x] re-write mag (FOUR KRAKEN x60???)
+- [ ] re-tune mag
 - [ ] re-tune shooter
 - [ ] re-write indexer (tbd)
+- [ ] fix autoCommandFactory
+- [ ] fix auto shoot cmd

@@ -12,17 +12,17 @@ import frc.robot.util.tunable.FlywheelConstants;
  * indexer interface
  */
 @GenerateEmptyIO
-public interface magazineIO {
+public interface MagazineIO {
     /**
      * indexer inputs class
      */
     @AutoLog
-    public class magazineInputs {
+    public class MagazineInputs {
         public AngularVelocity magazineVelocity = RotationsPerSecond.of(0);
         public Voltage magazineVoltage = Volts.of(0.0);
     }
 
-    public void updateInputs(magazineInputs inputs);
+    public void updateInputs(MagazineInputs inputs);
 
     public void setMagazineVoltage(double votlage);
 
