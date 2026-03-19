@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BiFunction;
+import java.util.function.DoubleSupplier;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
@@ -33,6 +34,7 @@ import frc.robot.subsystems.swerve.util.MoveToPoseBuilder;
 import frc.robot.subsystems.swerve.util.PhoenixOdometryThread;
 import frc.robot.subsystems.swerve.util.SwerveRateLimiter;
 import frc.robot.subsystems.swerve.util.TuningCommands;
+import frc.robot.subsystems.swerve.util.TurnToRotation;
 import frc.robot.util.AllianceFlipUtil;
 
 /**
@@ -476,5 +478,10 @@ public final class Swerve extends SubsystemBase {
                 modules[i].setDesiredState(states[i]);
             }
         });
+    }
+
+    public boolean turnToRotation(DoubleSupplier rot) {
+        new TurnToRotation(this, rot.getAsDouble(), false);
+        return true;
     }
 }

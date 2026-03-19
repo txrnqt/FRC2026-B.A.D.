@@ -32,9 +32,6 @@ import frc.robot.subsystems.LEDs;
 import frc.robot.subsystems.adjustable_hood.AdjustableHood;
 import frc.robot.subsystems.adjustable_hood.AdjustableHoodIOEmpty;
 import frc.robot.subsystems.adjustable_hood.AdjustableHoodReal;
-import frc.robot.subsystems.climber.Climber;
-import frc.robot.subsystems.climber.ClimberIOEmpty;
-import frc.robot.subsystems.climber.ClimberSim;
 import frc.robot.subsystems.indexer.Indexer;
 import frc.robot.subsystems.indexer.IndexerIOEmpty;
 import frc.robot.subsystems.indexer.IndexerReal;
@@ -52,16 +49,12 @@ import frc.robot.subsystems.swerve.gyro.GyroNavX2;
 import frc.robot.subsystems.swerve.mod.SwerveModuleIOEmpty;
 import frc.robot.subsystems.swerve.mod.SwerveModuleReal;
 import frc.robot.subsystems.swerve.util.TeleopControls;
-import frc.robot.subsystems.turret.Turret;
-import frc.robot.subsystems.turret.TurretIOEmpty;
-import frc.robot.subsystems.turret.TurretReal;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOEmpty;
 import frc.robot.subsystems.vision.VisionReal;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.tunable.ShotDataHelper;
 import frc.robot.viz.RobotViz;
-
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -76,20 +69,16 @@ public final class RobotContainer {
     public final CommandXboxController operator = new CommandXboxController(1);
     public final CommandXboxController tuner = new CommandXboxController(2);
     public final CommandXboxController pit = new CommandXboxController(3);
-
     /* Auto utilities */
     private final AutoChooser autoChooser = new AutoChooser();
     private final AutoCommandFactory autoCommandFactory;
-
     /* Subsystems */
     private final LEDs leds = new LEDs();
     private final Swerve swerve;
     private final Vision vision;
     private final AdjustableHood adjustableHood;
-    private final Turret turret;
     private final Shooter shooter;
     private final Intake intake;
-    private final Climber climber;
     private final Indexer indexer;
     private final RobotViz viz;
     private final SimulatedRobotState sim;
@@ -109,12 +98,9 @@ public final class RobotContainer {
                 swerve = new Swerve(SwerveReal::new, GyroNavX2::new, SwerveModuleReal::new);
                 vision = new Vision(swerve.state, new VisionReal());
                 adjustableHood = new AdjustableHood(new AdjustableHoodReal());
-                turret = new Turret(new TurretReal(), swerve.state);
                 shooter = new Shooter(new ShooterReal());
                 intake = new Intake(new IntakeReal());
-                climber = new Climber(new ClimberIOEmpty());
                 indexer = new Indexer(new IndexerReal());
-
                 break;
             case kSimulation:
                 // FuelSim.getInstance().spawnStartingFuel();
@@ -136,26 +122,19 @@ public final class RobotContainer {
                     sim.swerveDrive::moduleProvider);
                 vision = new Vision(swerve.state, sim.visionSim);
                 adjustableHood = new AdjustableHood(sim.adjustableHood);
-                turret = new Turret(sim.turret, swerve.state);
                 shooter = new Shooter(sim.shooter);
                 intake = new Intake(sim.intake);
-                climber = new Climber(sim.climber);
                 indexer = new Indexer(sim.indexer);
-
                 SmartDashboard.putNumber("VisionFudge", 0.0);
-
                 break;
             default:
                 sim = null;
                 swerve = new Swerve(SwerveIOEmpty::new, GyroIOEmpty::new, SwerveModuleIOEmpty::new);
                 vision = new Vision(swerve.state, new VisionIOEmpty());
                 adjustableHood = new AdjustableHood(new AdjustableHoodIOEmpty());
-                turret = new Turret(new TurretIOEmpty(), swerve.state);
                 shooter = new Shooter(new ShooterIOEmpty());
                 intake = new Intake(new IntakeIOEmpty());
-                climber = new Climber(new ClimberSim());
                 indexer = new Indexer(new IndexerIOEmpty());
-
                 break;
         }
         // DASHBOARD STUFF
@@ -168,12 +147,10 @@ public final class RobotContainer {
         SmartDashboard.putNumber(Constants.DashboardValues.feetPastCenter,
             Constants.DashboardValues.feetPastCenterDefault);
         // END DASHBOARD STUFF
-
-        viz = new RobotViz(sim, swerve, turret, adjustableHood, intake, climber, shooter);
-
+        viz = new RobotViz(sim, swerve, adjustableHood, intake, shooter);
         // AUTO STUFF
         autoCommandFactory = new AutoCommandFactory(swerve.autoFactory, swerve, adjustableHood,
-            climber, intake, indexer, shooter, turret);
+            intake, indexer, shooter);
         autoChooser.addCmd("Do Nothing", Commands::none);
         autoChooser.addRoutine("Gather then Shoot (Left)", autoCommandFactory::gatherThenShootLeft);
         autoChooser.addRoutine("Just Shoot", autoCommandFactory::justShoot);
@@ -191,10 +168,8 @@ public final class RobotContainer {
                 .withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
                 .andThen(Commands.runOnce(() -> swerve.stop())));
         // END AUTO STUFF
-
         // DEFAULT COMMANDS
         adjustableHood.setDefaultCommand(adjustableHood.setGoal(Degrees.of(0)));
-        turret.setDefaultCommand(CommandFactory.followHub(turret, swerve, () -> trims[1]));
         leds.setDefaultCommand(leds.blinkLEDs(Color.kRed));
         swerve.setDefaultCommand(swerve.driveUserRelative(TeleopControls.teleopControls(
             () -> -combineControllers(CommandXboxController::getLeftY, driver, tuner),
@@ -202,7 +177,6 @@ public final class RobotContainer {
             () -> -combineControllers(CommandXboxController::getRightX, driver, tuner),
             Constants.DriverControls.driverTranslationalMaxSpeed,
             Constants.DriverControls.driverRotationalMaxSpeed)));
-
         // TRIGGERS
         RobotModeTriggers.disabled().and(vision.seesTwoAprilTags.negate())
             .whileTrue(leds.setLEDsBreathe(Color.kBlue));
@@ -211,7 +185,6 @@ public final class RobotContainer {
             Logger.recordOutput("Trims", trims);
         }));
         vision.seesTwoAprilTags.whileTrue(leds.setLEDsSolid(Color.kChartreuse));
-
         // BUTTON BINDINGS
         maybeController("Driver", driver, this::setupDriver);
         maybeController("Operator", operator, this::setupOperator);
@@ -246,9 +219,7 @@ public final class RobotContainer {
 
     private void setupDriver() {
         driver.y().onTrue(swerve.setFieldRelativeOffset());
-        driver.b().whileTrue(turret.goToAngleRobotRelative(() -> Rotation2d.kZero));
         driver.x().whileTrue(swerve.wheelsIn());
-
         driver.rightTrigger().whileTrue(CommandFactory.shoot(swerve.state, () -> {
             if (AllianceFlipUtil.apply(swerve.state.getGlobalPoseEstimate())
                 .getX() > FieldConstants.Hub.centerHub.getX()) {
@@ -257,14 +228,13 @@ public final class RobotContainer {
             } else {
                 return AllianceFlipUtil.apply(FieldConstants.Hub.centerHub);
             }
-        }, turret, shooter, indexer, adjustableHood, () -> trims[0], () -> trims[1],
+        }, shooter, indexer, adjustableHood, () -> trims[0], () -> trims[1],
             () -> combineControllers((Predicate<CommandXboxController>) (x) -> x.b().getAsBoolean(),
                 driver, operator))
             .alongWith(swerve.driveUserRelative(TeleopControls.teleopControls(
                 () -> -driver.getLeftY(), () -> -driver.getLeftX(), () -> -driver.getRightX(),
                 Constants.DriverControls.driverTranslationalShootSpeed,
                 Constants.DriverControls.driverRotationalShootSpeed))));
-
         driver.povUp().onTrue(Commands.runOnce(() -> {
             trims[0] += 0.50;
         }));
@@ -277,17 +247,12 @@ public final class RobotContainer {
         driver.povRight().onTrue(Commands.runOnce(() -> {
             trims[1] -= 2.0;
         }));
-
         driver.leftTrigger().whileTrue(intake.extendHopper(1.0).andThen(intake.intakeBalls()))
             .onFalse(intake.retractHopper(0));
     }
 
     private void setupOperator() {
         operator.a().onTrue(Commands.runOnce(() -> swerve.state.resetInit()).ignoringDisable(true));
-        operator.b()
-            .onTrue(turret.goToAngleRobotRelative(() -> Rotation2d.kZero).until(operator.back()));
-
-        operator.x().whileTrue(turret.setVoltage(() -> operator.getLeftY() * 3.0));
         operator.y().onTrue(Commands.runOnce(() -> trims = new double[] {0.0, 0.0}));
         operator.povUp().onTrue(Commands.runOnce(() -> {
             trims[0] += 0.50;
@@ -307,7 +272,6 @@ public final class RobotContainer {
 
     private void setupTuner() {
         tuner.y().onTrue(swerve.setFieldRelativeOffset());
-
         tuner.rightTrigger()
             .whileTrue(shooter.shoot(() -> helper.flywheelSpeed).alongWith(
                 adjustableHood.setGoal(() -> Degrees.of(helper.hoodAngle)),
@@ -321,13 +285,11 @@ public final class RobotContainer {
                     .translationTolerance(Units.inchesToMeters(1)).finish()))
             .onFalse(shooter.shoot(0).alongWith(adjustableHood.setGoal(Degrees.of(0))));
         tuner.leftTrigger().whileTrue(indexer.setSpeedCommand(1.0, 0.7));
-
         tuner.a().whileTrue(Commands.run(() -> {
             Logger.recordOutput("TunerAPressed", 1.0);
         })).whileFalse(Commands.run(() -> {
             Logger.recordOutput("TunerAPressed", 0.0);
         }));
-
         // tuner.a().whileTrue(swerve.wheelRadiusCharacterization()).onFalse(swerve.emergencyStop());
         // tuner.b().whileTrue(swerve.feedforwardCharacterization()).onFalse(swerve.emergencyStop());
     }
@@ -380,7 +342,6 @@ public final class RobotContainer {
         field.setRobotPose(swerve.state.getGlobalPoseEstimate());
     }
 
-
     /**
      * Runs during disabled
      */
@@ -397,5 +358,3 @@ public final class RobotContainer {
             Rotation2d.kCCW_90deg));
     }
 }
-
-

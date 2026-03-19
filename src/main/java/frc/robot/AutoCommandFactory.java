@@ -12,15 +12,15 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
+import frc.robot.Constants.Climber;
+import frc.robot.Constants.Turret;
 import frc.robot.subsystems.adjustable_hood.AdjustableHood;
-import frc.robot.subsystems.climber.Climber;
 import frc.robot.subsystems.indexer.Indexer;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.util.MoveToPose;
 import frc.robot.subsystems.swerve.util.TurnToRotation;
-import frc.robot.subsystems.turret.Turret;
 import frc.robot.util.AllianceFlipUtil;
 
 /**
@@ -45,11 +45,9 @@ public class AutoCommandFactory {
         this.autoFactory = autoFactory;
         this.swerve = swerve;
         this.adjustableHood = adjustableHood;
-        this.climber = climber;
         this.indexer = indexer;
         this.intake = intake;
         this.shooter = shooter;
-        this.turret = turret;
     }
 
     /**
@@ -190,6 +188,6 @@ public class AutoCommandFactory {
                         .maxSpeed(1.5).translationTolerance(0.1).rotationTolerance(5).flipY(left)
                         .finish().withTimeout(3.5), swerve.emergencyStop())
                     .deadlineFor(shooter.shoot(60.0)))
-            .deadlineFor(CommandFactory.followHub(turret, swerve, () -> 0.0));
+            .deadlineFor(CommandFactory.followHub(swerve, () -> 0.0));
     }
 }
