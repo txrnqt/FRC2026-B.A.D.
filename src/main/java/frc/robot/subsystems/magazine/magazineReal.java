@@ -19,10 +19,6 @@ import frc.robot.util.tunable.FlywheelConstants;
 public class MagazineReal implements MagazineIO {
     private final TalonFX motor0 = new TalonFX(Constants.Magazine.motor0ID);
     private final TalonFX motor1 = new TalonFX(Constants.Magazine.motor1ID);
-    private final TalonFX motor2 = new TalonFX(Constants.Magazine.motor2ID);
-    private final TalonFX motor3 = new TalonFX(Constants.Magazine.motor3ID);
-    private final TalonFX motor4 = new TalonFX(Constants.Magazine.motor4ID);
-    private final TalonFX motor5 = new TalonFX(Constants.Magazine.motor5ID);
 
     private final StatusSignal<AngularVelocity> motor0Velocity = motor0.getVelocity();
     private final StatusSignal<Voltage> motor0Voltage = motor0.getMotorVoltage();
@@ -56,10 +52,6 @@ public class MagazineReal implements MagazineIO {
     @Override
     public void setConstants(FlywheelConstants constants) {
         motor1.setControl(new Follower(motor0.getDeviceID(), Constants.Magazine.motorAlingment));
-        motor2.setControl(new Follower(motor0.getDeviceID(), Constants.Magazine.motorAlingment));
-        motor3.setControl(new Follower(motor0.getDeviceID(), Constants.Magazine.motorAlingment));
-        motor4.setControl(new Follower(motor0.getDeviceID(), Constants.Magazine.motorAlingment));
-        motor5.setControl(new Follower(motor0.getDeviceID(), Constants.Magazine.motorAlingment));
 
         magzineConfig.MotorOutput.Inverted = Constants.Magazine.inverted;
         magzineConfig.MotorOutput.NeutralMode = Constants.Magazine.neutralMode;
@@ -72,9 +64,5 @@ public class MagazineReal implements MagazineIO {
 
         motor0.getConfigurator().apply(magzineConfig);
         motor1.getConfigurator().apply(magzineConfig);
-        motor2.getConfigurator().apply(magzineConfig);
-        motor3.getConfigurator().apply(magzineConfig);
-        motor4.getConfigurator().apply(magzineConfig);
-        motor5.getConfigurator().apply(magzineConfig);
     }
 }

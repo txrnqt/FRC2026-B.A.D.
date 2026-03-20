@@ -81,7 +81,6 @@ public final class ShooterReal implements ShooterIO {
             : InvertedValue.CounterClockwise_Positive;
         motorConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 
-        motorConfig.Slot0.kP = 9999.0;
         motorConfig.TorqueCurrent.PeakForwardTorqueCurrent = constants.holdCurrent;
         motorConfig.TorqueCurrent.PeakReverseTorqueCurrent = 0.0;
         motorConfig.MotorOutput.PeakForwardDutyCycle = constants.maxDutyCycle;

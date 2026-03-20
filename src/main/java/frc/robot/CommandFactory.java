@@ -55,7 +55,7 @@ public class CommandFactory {
     }
 
     /** Shoot at a given target. */
-    public static Command shoot(RobotState state, Supplier<Translation2d> targetSupplier,
+    public static Command shootWithSwerve(RobotState state, Supplier<Translation2d> targetSupplier,
         Swerve swerve, Shooter shooter, Indexer indexer, AdjustableHood hood, Magazine magazine,
         DoubleSupplier adjustUp, DoubleSupplier adjustLeft, CommandXboxController controller,
         BooleanSupplier disableTurret) {
@@ -115,6 +115,67 @@ public class CommandFactory {
         }, shooter, swerve, indexer, hood);
     }
 
+    /** Shoot at a given target. */
+    public static Command justShoot(RobotState state, Supplier<Translation2d> targetSupplier,
+        Swerve swerve, Shooter shooter, Indexer indexer, AdjustableHood hood, Magazine magazine,
+        DoubleSupplier adjustUp, DoubleSupplier adjustLeft, BooleanSupplier disableTurret) {
+        return Commands.runEnd(() -> {
+            var lookahead = state.getFieldRelativeSpeeds().times(0.05);
+            final Translation2d target = targetSupplier.get()
+                .plus(new Translation2d(lookahead.vxMetersPerSecond, lookahead.vyMetersPerSecond));
+            Translation2d adjustedTarget = target;
+            double turretFudge =
+                swerve.state.getGlobalPoseEstimate().getRotation().getCos() < 0.5 ? 2 : 0;
+            double adjustUpValue = Units.feetToMeters(adjustUp.getAsDouble() + turretFudge);
+            Rotation2d adjustLeftValue = Rotation2d.fromDegrees(adjustLeft.getAsDouble());
+            Logger.recordOutput("AutoShoot/AdjustUp", adjustUpValue);
+            Logger.recordOutput("AutoShoot/AdjustLeft", adjustLeftValue);
+            for (int i = 0; i < 20; i++) {
+                double distance =
+                    adjustedTarget.getDistance(state.getTurretCenterFieldFrame().getTranslation())
+                        + adjustUpValue;
+                var parameters = ShotData.getShotParameters(Units.metersToFeet(distance),
+                    shooter.inputs.shooterAngularVelocity1.in(RotationsPerSecond), false);
+                double tof = parameters.timeOfFlight();
+                var forward = state.getFieldRelativeSpeeds().times(tof);
+                adjustedTarget = target
+                    .minus(new Translation2d(forward.vxMetersPerSecond, forward.vyMetersPerSecond));
+            }
+            Logger.recordOutput("AutoShoot/Target", target);
+            Logger.recordOutput("AutoShoot/AdjustedTarget", adjustedTarget);
+            Logger.recordOutput("AutoShoot/TargetDiff", adjustedTarget.minus(target));
+            double distance =
+                adjustedTarget.getDistance(state.getTurretCenterFieldFrame().getTranslation())
+                    + adjustUpValue;
+            var parameters = ShotData.getShotParameters(Units.metersToFeet(distance),
+                shooter.inputs.shooterAngularVelocity1.in(RotationsPerSecond), true);
+            shooter.setVelocity(parameters.desiredSpeed());
+            hood.setTargetAngle(
+                Degrees.of(MathUtil.clamp(parameters.hoodAngleDeg() + 1.0, 0.0, 30.0)));
+            final Translation2d swerveTarget = adjustedTarget;
+            swerve.turnToRotation(() -> swerveTarget.getAngle().getRadians());
+
+
+            boolean isOkay = parameters.isOkayToShoot();
+            Logger.recordOutput("AutoShoot/isOkay", isOkay);
+            Logger.recordOutput("AutoShoot/desiredSpeed", parameters.desiredSpeed());
+            Logger.recordOutput("AutoShoot/hoodAngleDeg",
+                MathUtil.clamp(parameters.hoodAngleDeg(), 0.0, 30.0));
+            Logger.recordOutput("AutoShoot/distanceFeet", Units.metersToFeet(distance));
+            if (isOkay) {
+                magazine.setVoltage(3.0);
+                indexer.setSpindexerDutyCycle(6.0);
+            } else {
+                magazine.setVoltage(0.0);
+                indexer.setSpindexerDutyCycle(0.0);
+            }
+        }, () -> {
+            shooter.setVelocity(0.0);
+            magazine.setVoltage(0.0);
+            indexer.setSpindexerDutyCycle(0.0);
+        }, shooter, swerve, indexer, hood);
+    }
+
     /** Point turret at hub. */
     public static Command followHub(Swerve swerve, CommandXboxController controller,
         Translation2d target) {
@@ -135,3 +196,4 @@ public class CommandFactory {
         });
     }
 }
+
